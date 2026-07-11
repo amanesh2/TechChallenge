@@ -6,17 +6,17 @@ This guide configures GitHub Actions to authenticate to Azure via Microsoft Entr
 
 1. Create an app registration for CI/CD identity, for example `app-qotd-github-actions`.
 2. Record:
-- Application (client) ID
-- Directory (tenant) ID
+- Application (client) ID = 79276200-fa1d-4217-89a5-8c8254d40016
+- Directory (tenant) ID = b5071aec-583e-4cdd-a4f5-2c6285f12b23
 
 ## 2. Create Federated Credentials
 
 Add these federated credentials to the app registration:
 
-1. `repo:amanesh1/Tilt_TC_Ali:ref:refs/heads/main`
-2. `repo:amanesh1/Tilt_TC_Ali:environment:dev`
-3. `repo:amanesh1/Tilt_TC_Ali:environment:production`
-4. `repo:amanesh1/Tilt_TC_Ali:environment:plan`
+1. `repo:amanesh2/TechChallenge:ref:refs/heads/main`
+2. `repo:amanesh2/TechChallenge:environment:dev`
+3. `repo:amanesh2/TechChallenge:environment:production`
+4. `repo:amanesh2/TechChallenge:environment:plan`
 
 Use:
 - Issuer: `https://token.actions.githubusercontent.com`
