@@ -1,10 +1,10 @@
 resource "azurerm_cdn_frontdoor_profile" "this" {
-  count               = var.create_profile_resources ? 1 : 0
-  name                = var.profile_name
-  resource_group_name = var.resource_group_name
-  sku_name            = var.sku_name
+  count                    = var.create_profile_resources ? 1 : 0
+  name                     = var.profile_name
+  resource_group_name      = var.resource_group_name
+  sku_name                 = var.sku_name
   response_timeout_seconds = 60
-  tags                = var.tags
+  tags                     = var.tags
 }
 
 resource "azurerm_cdn_frontdoor_endpoint" "this" {
@@ -53,7 +53,7 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "this" {
 }
 
 locals {
-  active_profile_id = var.create_profile_resources ? azurerm_cdn_frontdoor_profile.this[0].id : var.existing_profile_id
+  active_profile_id  = var.create_profile_resources ? azurerm_cdn_frontdoor_profile.this[0].id : var.existing_profile_id
   active_endpoint_id = var.create_profile_resources ? azurerm_cdn_frontdoor_endpoint.this[0].id : var.existing_endpoint_id
 }
 
@@ -97,16 +97,16 @@ resource "azurerm_cdn_frontdoor_origin_group" "this" {
 }
 
 resource "azurerm_cdn_frontdoor_origin" "this" {
-  count                         = var.create_routing_resources ? 1 : 0
-  name                          = var.origin_name
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.this[0].id
-  enabled                       = true
-  host_name                     = var.origin_hostname
-  origin_host_header            = var.origin_hostname
-  http_port                     = 80
-  https_port                    = 443
-  priority                      = 1
-  weight                        = 1000
+  count                          = var.create_routing_resources ? 1 : 0
+  name                           = var.origin_name
+  cdn_frontdoor_origin_group_id  = azurerm_cdn_frontdoor_origin_group.this[0].id
+  enabled                        = true
+  host_name                      = var.origin_hostname
+  origin_host_header             = var.origin_hostname
+  http_port                      = 80
+  https_port                     = 443
+  priority                       = 1
+  weight                         = 1000
   certificate_name_check_enabled = true
 }
 

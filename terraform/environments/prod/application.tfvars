@@ -1,18 +1,18 @@
-environment                         = "prod"
-location                            = "eastus2"
-region_short                        = "eus2"
-project_name                        = "qotd"
-cost_center                         = "interview"
+environment  = "prod"
+location     = "eastus2"
+region_short = "eus2"
+project_name = "qotd"
+cost_center  = "interview"
 
 platform_state_resource_group_name  = "rg-qotd-bootstrap-eastus2"
 platform_state_storage_account_name = "stqotdtfstateeus2"
 platform_state_container_name       = "platform-prod"
 platform_state_key                  = "platform-prod.tfstate"
 
-app_plan_sku_name                   = "P1v3"
-app_plan_zone_redundant             = true
-app_plan_enable_autoscale           = true
-sql_sku_name                        = "GP_Gen5_2"
-sql_zone_redundant                  = true
+app_plan_sku_name         = "P1v3"
+app_plan_zone_redundant   = true
+app_plan_enable_autoscale = true
+sql_sku_name              = "GP_Gen5_2"
+sql_zone_redundant        = true
 
-alert_email                         = "ops@qotd.local"
+alert_email = "ops@qotd.local"

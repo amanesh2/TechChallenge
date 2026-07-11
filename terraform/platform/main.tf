@@ -67,13 +67,13 @@ resource "azurerm_key_vault_secret" "appinsights_connection_string" {
 }
 
 module "front_door" {
-  source                    = "../modules/front_door"
-  resource_group_name       = module.platform_rg.name
-  profile_name              = "afd-${var.project_name}-${var.environment}"
-  endpoint_name             = "afd-endpoint-${var.project_name}-${var.environment}"
-  waf_policy_name           = "afd-waf-${var.project_name}-${var.environment}"
+  source                     = "../modules/front_door"
+  resource_group_name        = module.platform_rg.name
+  profile_name               = "afd-${var.project_name}-${var.environment}"
+  endpoint_name              = "afd-endpoint-${var.project_name}-${var.environment}"
+  waf_policy_name            = "afd-waf-${var.project_name}-${var.environment}"
   log_analytics_workspace_id = module.log_analytics.id
-  create_profile_resources  = true
-  create_routing_resources  = false
-  tags                      = local.common_tags
+  create_profile_resources   = true
+  create_routing_resources   = false
+  tags                       = local.common_tags
 }
