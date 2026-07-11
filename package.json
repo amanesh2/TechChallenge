@@ -1,0 +1,27 @@
+{
+  "name": "quote-of-the-day-azure",
+  "version": "1.0.0",
+  "description": "Secure Azure-hosted Quote of the Day application",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node --test src/test/*.test.js",
+    "lint": "eslint src/**/*.js scripts/*.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.5.0",
+    "applicationinsights": "^3.5.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "helmet": "^8.0.0",
+    "mssql": "^11.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}

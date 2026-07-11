@@ -1,0 +1,12 @@
+node_modules/
+.env
+.terraform/
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+.DS_Store
+coverage/
+npm-debug.log*
+platform-plan.txt
+application-plan.txt

@@ -1,0 +1,184 @@
+name: release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: Validate all terraform
+        run: |
+          terraform fmt -check -recursive
+          (cd terraform/bootstrap && terraform init -backend=false && terraform validate)
+          (cd terraform/platform && terraform init -backend=false && terraform validate)
+          (cd terraform/application && terraform init -backend=false && terraform validate)
+
+  apply-platform:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: dev
+    concurrency:
+      group: release-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
+      - name: Apply platform
+        working-directory: terraform/platform
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ vars.TFSTATE_RG }}" \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ vars.TFSTATE_PLATFORM_CONTAINER_DEV }}" \
+            -backend-config="key=platform-dev.tfstate"
+          terraform apply -auto-approve -var-file=../environments/dev/platform.tfvars
+
+  apply-application:
+    needs: apply-platform
+    runs-on: ubuntu-latest
+    environment: dev
+    concurrency:
+      group: release-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
+      - name: Apply application
+        working-directory: terraform/application
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ vars.TFSTATE_RG }}" \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ vars.TFSTATE_APPLICATION_CONTAINER_DEV }}" \
+            -backend-config="key=application-dev.tfstate"
+          terraform apply -auto-approve \
+            -var-file=../environments/dev/application.tfvars \
+            -var="sql_admin_login=${{ vars.SQL_ADMIN_LOGIN }}" \
+            -var="sql_admin_password=${{ secrets.SQL_ADMIN_PASSWORD }}" \
+            -var="entra_admin_login=${{ vars.ENTRA_ADMIN_LOGIN }}" \
+            -var="entra_admin_object_id=${{ vars.ENTRA_ADMIN_OBJECT_ID }}"
+
+  seed:
+    needs: apply-application
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
+      - name: Add temporary SQL firewall rule
+        run: |
+          RUNNER_IP=$(curl -s https://api.ipify.org)
+          az sql server firewall-rule create \
+            --resource-group "${{ vars.SQL_RESOURCE_GROUP }}" \
+            --server "${{ vars.SQL_SERVER_NAME }}" \
+            --name "jit-gha-${{ github.run_id }}" \
+            --start-ip-address "${RUNNER_IP}" \
+            --end-ip-address "${RUNNER_IP}"
+      - name: Provision DB principals and seed
+        env:
+          SQL_SERVER_FQDN: ${{ vars.SQL_SERVER_FQDN }}
+          SQL_DATABASE_NAME: ${{ vars.SQL_DATABASE_NAME }}
+          APP_UAMI_NAME: ${{ vars.APP_UAMI_NAME }}
+          SEEDER_UAMI_NAME: ${{ vars.SEEDER_UAMI_NAME }}
+        run: |
+          node scripts/provision-database-principals.js
+          node scripts/seed-database.js
+      - name: Remove temporary SQL firewall rule
+        if: always()
+        run: |
+          az sql server firewall-rule delete \
+            --resource-group "${{ vars.SQL_RESOURCE_GROUP }}" \
+            --server "${{ vars.SQL_SERVER_NAME }}" \
+            --name "jit-gha-${{ github.run_id }}"
+
+  deploy-app:
+    needs: seed
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install
+      - name: Prepare deploy package
+        run: |
+          rm -rf deploy_bundle
+          mkdir deploy_bundle
+          cp package.json deploy_bundle/
+          cp -R src deploy_bundle/
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
+      - name: Deploy to staging
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.APP_SERVICE_NAME }}
+          slot-name: staging
+          package: deploy_bundle
+      - name: Smoke test
+        run: |
+          chmod +x scripts/smoke-test.sh
+          export SMOKE_BASE_URL="https://${{ vars.APP_SERVICE_NAME }}-staging.azurewebsites.net"
+          scripts/smoke-test.sh
+      - name: Swap staging to prod
+        run: |
+          az webapp deployment slot swap \
+            --resource-group "${{ vars.APP_RESOURCE_GROUP }}" \
+            --name "${{ vars.APP_SERVICE_NAME }}" \
+            --slot staging \
+            --target-slot production

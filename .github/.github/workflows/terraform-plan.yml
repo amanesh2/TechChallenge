@@ -1,0 +1,91 @@
+name: terraform-plan
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    environment: plan
+    concurrency:
+      group: release-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
+
+      - name: Terraform plan platform
+        working-directory: terraform/platform
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ vars.TFSTATE_RG }}" \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ vars.TFSTATE_PLATFORM_CONTAINER_DEV }}" \
+            -backend-config="key=platform-dev.tfstate"
+          terraform plan -var-file=../environments/dev/platform.tfvars -out=tfplan
+          terraform show -no-color tfplan > ../../platform-plan.txt
+
+      - name: Terraform plan application
+        working-directory: terraform/application
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ vars.TFSTATE_RG }}" \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ vars.TFSTATE_APPLICATION_CONTAINER_DEV }}" \
+            -backend-config="key=application-dev.tfstate"
+          terraform plan \
+            -var-file=../environments/dev/application.tfvars \
+            -var="sql_admin_login=${{ vars.SQL_ADMIN_LOGIN }}" \
+            -var="sql_admin_password=${{ secrets.SQL_ADMIN_PASSWORD }}" \
+            -var="entra_admin_login=${{ vars.ENTRA_ADMIN_LOGIN }}" \
+            -var="entra_admin_object_id=${{ vars.ENTRA_ADMIN_OBJECT_ID }}" \
+            -out=tfplan
+          terraform show -no-color tfplan > ../../application-plan.txt
+
+      - name: Comment plan on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const platform = fs.readFileSync('platform-plan.txt', 'utf8').slice(0, 60000);
+            const application = fs.readFileSync('application-plan.txt', 'utf8').slice(0, 60000);
+            const body = [
+              '## Terraform Plan (Dev)',
+              '',
+              '### Platform',
+              '```',
+              platform,
+              '```',
+              '',
+              '### Application',
+              '```',
+              application,
+              '```'
+            ].join('\n');
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });

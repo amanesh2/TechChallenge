@@ -1,0 +1,80 @@
+name: app-deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  attestations: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    concurrency:
+      group: release-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare deploy package
+        run: |
+          rm -rf deploy_bundle
+          mkdir deploy_bundle
+          cp package.json deploy_bundle/
+          cp -R src deploy_bundle/
+
+      - name: Build artifact
+        run: |
+          tar -czf app.tar.gz deploy_bundle
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: app.tar.gz
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
+
+      - name: Deploy to staging slot
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.APP_SERVICE_NAME }}
+          slot-name: staging
+          package: deploy_bundle
+
+      - name: Smoke test staging slot
+        run: |
+          chmod +x scripts/smoke-test.sh
+          export SMOKE_BASE_URL="https://${{ vars.APP_SERVICE_NAME }}-staging.azurewebsites.net"
+          scripts/smoke-test.sh
+
+      - name: Swap staging to production
+        run: |
+          az webapp deployment slot swap \
+            --resource-group "${{ vars.APP_RESOURCE_GROUP }}" \
+            --name "${{ vars.APP_SERVICE_NAME }}" \
+            --slot staging \
+            --target-slot production

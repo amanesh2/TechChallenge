@@ -1,0 +1,57 @@
+name: terraform-validate
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-*.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Terraform format check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init and validate bootstrap
+        working-directory: terraform/bootstrap
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Terraform init and validate platform
+        working-directory: terraform/platform
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Terraform init and validate application
+        working-directory: terraform/application
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: TFLint
+        run: |
+          tflint --init
+          tflint --recursive terraform
+
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform
+          quiet: true
