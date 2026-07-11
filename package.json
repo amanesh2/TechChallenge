@@ -16,7 +16,7 @@
   "dependencies": {
     "@azure/identity": "^4.5.0",
     "applicationinsights": "^3.5.0",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.4.2",
     "express": "^4.21.0",
     "helmet": "^8.0.0",
     "mssql": "^11.0.1"
