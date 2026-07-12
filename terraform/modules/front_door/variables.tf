@@ -95,3 +95,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_diagnostics" {
+  description = "Enable diagnostic settings for Front Door."
+  type        = bool
+  default     = true
+}

@@ -75,5 +75,6 @@ module "front_door" {
   log_analytics_workspace_id = module.log_analytics.id
   create_profile_resources   = true
   create_routing_resources   = false
+  enable_diagnostics         = true
   tags                       = local.common_tags
 }

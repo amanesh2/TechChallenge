@@ -1,3 +1,7 @@
+local {
+  normalised_waf_policy_name = substr("waf${regexreplace(var.waf_policy_name, "[^0-9A-Za-z]", "")}", 0, 128)
+}
+
 resource "azurerm_cdn_frontdoor_profile" "this" {
   count                    = var.create_profile_resources ? 1 : 0
   name                     = var.profile_name
@@ -17,7 +21,7 @@ resource "azurerm_cdn_frontdoor_endpoint" "this" {
 
 resource "azurerm_cdn_frontdoor_firewall_policy" "this" {
   count               = var.create_profile_resources ? 1 : 0
-  name                = var.waf_policy_name
+  name                = local.normalised_waf_policy_name
   resource_group_name = var.resource_group_name
   sku_name            = var.sku_name
   enabled             = true
@@ -125,7 +129,7 @@ resource "azurerm_cdn_frontdoor_route" "this" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "front_door" {
-  count                      = var.create_profile_resources && var.log_analytics_workspace_id != "" ? 1 : 0
+  count                      = var.create_profile_resources && var.enable_diagnostics ? 1 : 0
   name                       = "diag-${var.profile_name}"
   target_resource_id         = azurerm_cdn_frontdoor_profile.this[0].id
   log_analytics_workspace_id = var.log_analytics_workspace_id
