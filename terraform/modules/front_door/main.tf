@@ -1,4 +1,4 @@
-local {
+locals {
   normalised_waf_policy_name = substr("waf${regexreplace(var.waf_policy_name, "[^0-9A-Za-z]", "")}", 0, 128)
 }
 
