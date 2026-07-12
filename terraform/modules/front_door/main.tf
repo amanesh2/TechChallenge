@@ -1,5 +1,5 @@
 locals {
-  normalised_waf_policy_name = substr("waf${regexreplace(var.waf_policy_name, "[^0-9A-Za-z]", "")}", 0, 128)
+  normalised_waf_policy_name = substr("waf${replace(var.waf_policy_name, "/[^0-9A-Za-z]/", "")}", 0, 128)
 }
 
 resource "azurerm_cdn_frontdoor_profile" "this" {
