@@ -25,13 +25,13 @@ resource "azurerm_linux_web_app" "this" {
   }
 
   site_config {
-    always_on              = true
-    minimum_tls_version    = "1.2"
-    ftps_state             = "Disabled"
-    health_check_path      = "/health/ready"
+    always_on                         = true
+    minimum_tls_version               = "1.2"
+    ftps_state                        = "Disabled"
+    health_check_path                 = "/health/ready"
     health_check_eviction_time_in_min = 5
-    vnet_route_all_enabled = true
-    app_command_line       = "node src/server.js"
+    vnet_route_all_enabled            = true
+    app_command_line                  = "node src/server.js"
 
     application_stack {
       node_version = "20-lts"
@@ -64,18 +64,21 @@ resource "azurerm_linux_web_app_slot" "staging" {
   key_vault_reference_identity_id = var.user_assigned_identity_id
   tags                            = var.tags
 
+  virtual_network_subnet_id = var.app_subnet_id
+
   identity {
     type         = "UserAssigned"
     identity_ids = [var.user_assigned_identity_id]
   }
 
   site_config {
-    always_on              = true
-    minimum_tls_version    = "1.2"
-    ftps_state             = "Disabled"
-    health_check_path      = "/health/ready"
-    vnet_route_all_enabled = true
-    app_command_line       = "node src/server.js"
+    always_on                         = true
+    minimum_tls_version               = "1.2"
+    ftps_state                        = "Disabled"
+    health_check_path                 = "/health/ready"
+    health_check_eviction_time_in_min = 10
+    vnet_route_all_enabled            = true
+    app_command_line                  = "node src/server.js"
 
     application_stack {
       node_version = "20-lts"
@@ -173,8 +176,7 @@ resource "azurerm_monitor_diagnostic_setting" "app" {
     category = "AppServiceConsoleLogs"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
