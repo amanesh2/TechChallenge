@@ -65,11 +65,11 @@ jobs:
           slot-name: staging
           package: deploy_bundle
 
-      #- name: Smoke test staging slot
-      #  run: |
-      #    chmod +x scripts/smoke-test.sh
-      #    export SMOKE_BASE_URL="https://${{ vars.APP_SERVICE_NAME }}-staging.azurewebsites.net"
-      #    scripts/smoke-test.sh
+      - name: Smoke test staging slot
+        run: |
+          chmod +x scripts/smoke-test.sh
+          export SMOKE_BASE_URL="https://${{ vars.APP_SERVICE_NAME }}-staging.azurewebsites.net"
+          scripts/smoke-test.sh
 
       - name: Swap staging to production
         run: |
