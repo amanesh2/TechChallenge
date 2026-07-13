@@ -146,8 +146,8 @@ resource "azurerm_monitor_diagnostic_setting" "front_door" {
     category = "FrontDoorHealthProbeLog"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
+
 }
