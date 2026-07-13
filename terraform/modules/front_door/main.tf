@@ -38,7 +38,7 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "this" {
   }
 
   custom_rule {
-    name                           = "rate-limit-100-rpm"
+    name                           = "ratelimit100rpm"
     enabled                        = true
     priority                       = 1
     rate_limit_duration_in_minutes = 1
