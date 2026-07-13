@@ -465,7 +465,7 @@ Pattern: `<resource-abbreviation>-qotd-<env>-<region-short>[-<instance>]`
 | Log Analytics | `log` | `log-qotd-dev-eus2` |
 | App Insights | `appi` | `appi-qotd-dev-eus2` |
 | VNet | `vnet` | `vnet-qotd-dev-eus2` |
-| Storage (state) | `st` | `stqotdtfstateeus2` (no dashes, ≤24 chars, globally unique) |
+| Storage (state) | `st` | `stqotdtfstate11` (no dashes, ≤24 chars, globally unique) |
 
 All resources tagged with: `environment`, `project=quote-of-the-day`, `managed-by=terraform`, `cost-center` (placeholder), `data-classification=confidential-pii`.
 

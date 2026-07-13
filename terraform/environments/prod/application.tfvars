@@ -5,7 +5,7 @@ project_name = "qotd"
 cost_center  = "interview"
 
 platform_state_resource_group_name  = "rg-qotd-bootstrap-eastus2"
-platform_state_storage_account_name = "stqotdtfstateeus2"
+platform_state_storage_account_name = "stqotdtfstate11"
 platform_state_container_name       = "platform-prod"
 platform_state_key                  = "platform-prod.tfstate"
 

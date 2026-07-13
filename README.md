@@ -47,7 +47,7 @@ The app requires:
 ```bash
 cd terraform/bootstrap
 terraform init
-terraform apply -var="storage_account_name=stqotdtfstateeus2"
+terraform apply -var="storage_account_name=stqotdtfstate11"
 ```
 
 ## Terraform Platform (Demo)
@@ -56,7 +56,7 @@ terraform apply -var="storage_account_name=stqotdtfstateeus2"
 cd terraform/platform
 terraform init \
   -backend-config="resource_group_name=rg-qotd-bootstrap-eastus2" \
-  -backend-config="storage_account_name=stqotdtfstateeus2" \
+  -backend-config="storage_account_name=stqotdtfstate11" \
   -backend-config="container_name=platform-dev" \
   -backend-config="key=platform-dev.tfstate"
 terraform apply -var-file=../environments/dev/platform.tfvars
@@ -68,7 +68,7 @@ terraform apply -var-file=../environments/dev/platform.tfvars
 cd terraform/application
 terraform init \
   -backend-config="resource_group_name=rg-qotd-bootstrap-eastus2" \
-  -backend-config="storage_account_name=stqotdtfstateeus2" \
+  -backend-config="storage_account_name=stqotdtfstate11" \
   -backend-config="container_name=application-dev" \
   -backend-config="key=application-dev.tfstate"
 terraform apply \
