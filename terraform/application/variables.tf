@@ -8,6 +8,12 @@ variable "location" {
   type        = string
 }
 
+variable "database_location" {
+  description = "Azure region for the database."
+  type        = string
+  default     = "Central US"
+}
+
 variable "region_short" {
   description = "Short region code for naming."
   type        = string

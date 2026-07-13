@@ -8,6 +8,11 @@ variable "location" {
   type        = string
 }
 
+variable "database_location" {
+  description = "Azure region for the database."
+  type        = string
+}
+
 variable "server_name" {
   description = "Azure SQL Server name."
   type        = string

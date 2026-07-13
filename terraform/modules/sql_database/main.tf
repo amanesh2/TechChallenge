@@ -1,7 +1,7 @@
 resource "azurerm_mssql_server" "this" {
   name                          = var.server_name
   resource_group_name           = var.resource_group_name
-  location                      = var.location
+  location                      = var.database_location
   version                       = "12.0"
   administrator_login           = var.administrator_login
   administrator_login_password  = var.administrator_login_password
@@ -62,8 +62,7 @@ resource "azurerm_monitor_diagnostic_setting" "sql_server" {
     category = "SQLSecurityAuditEvents"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }

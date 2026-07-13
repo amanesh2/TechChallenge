@@ -31,7 +31,7 @@ module "app_rg" {
 module "data_rg" {
   source   = "../modules/resource_group"
   name     = "rg-${local.suffix}-data"
-  location = var.location
+  location = var.database_location
   tags     = local.common_tags
 }
 
@@ -49,6 +49,7 @@ module "sql" {
   source                         = "../modules/sql_database"
   resource_group_name            = module.data_rg.name
   location                       = var.location
+  database_location              = var.database_location
   server_name                    = "sql-${local.suffix}"
   database_name                  = "sqldb-${local.suffix}"
   sku_name                       = var.sql_sku_name
