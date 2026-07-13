@@ -61,7 +61,7 @@ resource "azurerm_monitor_metric_alert" "sql_cpu" {
   description         = "SQL CPU threshold exceeded"
   severity            = 3
   frequency           = "PT5M"
-  window_size         = "PT1M"
+  window_size         = "PT10M"
 
   criteria {
     metric_namespace = "Microsoft.Sql/servers/databases"
