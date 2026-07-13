@@ -85,6 +85,7 @@ module "app_service" {
     SQL_SERVER_FQDN                       = module.sql.sql_server_fqdn
     SQL_DATABASE_NAME                     = module.sql.sql_database_name
     APPLICATIONINSIGHTS_CONNECTION_STRING = "@Microsoft.KeyVault(SecretUri=${data.terraform_remote_state.platform.outputs.appinsights_secret_uri})"
+    AZURE_CLIENT_ID                       = module.identity.app_identity_client_id
   }
   tags = local.common_tags
 }
