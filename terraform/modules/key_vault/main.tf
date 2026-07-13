@@ -67,8 +67,7 @@ resource "azurerm_monitor_diagnostic_setting" "this" {
     category = "AuditEvent"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
