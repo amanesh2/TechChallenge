@@ -29,7 +29,7 @@ resource "azurerm_linux_web_app" "this" {
     minimum_tls_version    = "1.2"
     ftps_state             = "Disabled"
     health_check_path      = "/health/ready"
-    health_check_eviction_time_in_minutes = 5
+    health_check_eviction_time_in_min = 5
     vnet_route_all_enabled = true
     app_command_line       = "node src/server.js"
 
