@@ -18,7 +18,7 @@ output "seeder_identity_principal_id" {
   value       = azurerm_user_assigned_identity.seeder.principal_id
 }
 
-output "umai_identity_id" {
-  description = "UMAI identity resource id."
-  value       = azurerm_user_assigned_identity.umai.id
-}
+#output "umai_identity_id" {
+#  description = "UMAI identity resource id."
+#  value       = azurerm_user_assigned_identity.umai.id
+#}
