@@ -11,7 +11,7 @@ platform_state_container_name       = "platform-prod"
 platform_state_key                  = "platform-prod.tfstate"
 
 app_plan_sku_name         = "P1v2"
-app_plan_zone_redundant   = true
+app_plan_zone_redundant   = false #should be true
 app_plan_enable_autoscale = true
 sql_sku_name              = "GP_Gen5_2"
 sql_zone_redundant        = true
