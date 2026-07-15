@@ -24,7 +24,7 @@ See:
 
 1. Terraform >= 1.8
 2. Azure CLI >= 2.60
-3. Node.js >= 20
+3. Node.js >= 22
 4. GitHub repository configured with OIDC federation and environment protections
 
 ## Local Development

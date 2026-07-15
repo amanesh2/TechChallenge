@@ -34,7 +34,7 @@ resource "azurerm_linux_web_app" "this" {
     app_command_line                  = "node src/server.js"
 
     application_stack {
-      node_version = "20-lts"
+      node_version = "22-lts"
     }
 
     dynamic "ip_restriction" {
@@ -81,7 +81,7 @@ resource "azurerm_linux_web_app_slot" "staging" {
     app_command_line                  = "node src/server.js"
 
     application_stack {
-      node_version = "20-lts"
+      node_version = "22-lts"
     }
 
     dynamic "ip_restriction" {
