@@ -61,4 +61,8 @@ resource "azurerm_monitor_diagnostic_setting" "sql_server" {
   enabled_metric {
     category = "AllMetrics"
   }
+
+  lifecycle {
+    prevent_destroy = false
+  }
 }
