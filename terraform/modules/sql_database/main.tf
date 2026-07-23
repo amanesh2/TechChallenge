@@ -54,7 +54,7 @@ resource "azurerm_private_endpoint" "sql" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "sql_server" {
-  name                       = "diag-${var.server_name}"
+  name                       = "diag2-${var.server_name}"
   target_resource_id         = azurerm_mssql_server.this.id
   log_analytics_workspace_id = var.log_analytics_workspace_id
 
@@ -62,7 +62,4 @@ resource "azurerm_monitor_diagnostic_setting" "sql_server" {
     category = "AllMetrics"
   }
 
-  lifecycle {
-    prevent_destroy = false
-  }
 }
