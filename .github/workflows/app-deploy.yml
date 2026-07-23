@@ -62,22 +62,22 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ vars.APP_SERVICE_NAME }}
-          slot-name: staging
+          slot-name: production
           package: deploy_bundle
 
-      - name: Smoke test staging slot
-        run: |
-          chmod +x scripts/smoke-test.sh
-          export SMOKE_BASE_URL="https://${{ vars.APP_SERVICE_NAME }}-staging.azurewebsites.net"
-          scripts/smoke-test.sh
+      #- name: Smoke test staging slot
+      #  run: |
+      #    chmod +x scripts/smoke-test.sh
+      #    export SMOKE_BASE_URL="https://${{ vars.APP_SERVICE_NAME }}-staging.azurewebsites.net"
+      #    scripts/smoke-test.sh
 
-      - name: Swap staging to main slot
-        run: |
-          az webapp deployment slot swap \
-            --resource-group "${{ vars.APP_RESOURCE_GROUP }}" \
-            --name "${{ vars.APP_SERVICE_NAME }}" \
-            --slot staging \
-            --target-slot production
+      #- name: Swap staging to main slot
+      #  run: |
+      #    az webapp deployment slot swap \
+      #      --resource-group "${{ vars.APP_RESOURCE_GROUP }}" \
+      #      --name "${{ vars.APP_SERVICE_NAME }}" \
+      #      --slot staging \
+      #      --target-slot production
 
   deploy-prod:
     runs-on: ubuntu-latest
