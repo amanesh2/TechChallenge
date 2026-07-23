@@ -82,7 +82,7 @@ jobs:
   deploy-prod:
     runs-on: ubuntu-latest
     environment: production
-    needs: deploy
+    #needs: deploy
     if: github.ref == 'refs/heads/main'
     concurrency:
       group: release-prod-${{ github.ref }}
