@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     concurrency:
-      group: release-${{ github.ref }}
+      group: release-dev-${{ github.ref }}
       cancel-in-progress: false
     steps:
       - name: Checkout
@@ -82,9 +82,10 @@ jobs:
   deploy-prod:
     runs-on: ubuntu-latest
     environment: production
+    needs: deploy
     if: github.ref == 'refs/heads/main'
     concurrency:
-      group: release-${{ github.ref }}
+      group: release-prod-${{ github.ref }}
       cancel-in-progress: false
     steps:
       - name: Checkout
